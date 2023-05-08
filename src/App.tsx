@@ -1,6 +1,6 @@
 import { useAppSelector, useAppDispatch } from "./hooks/hooks"
 import { startGame, changeDirection, restartGame, moveSnake } from "./features/gameSlice"
-import { useEffect } from 'react'
+import { useEffect, useRef } from 'react'
 
 function App() {
   
@@ -12,18 +12,22 @@ function App() {
   
   const dispatch = useAppDispatch()
 
+  const intervalRef : any = useRef(null)
+
   function gameStart() {
-    dispatch(startGame())
-    setInterval(() => {
+    dispatch(startGame())    
+    intervalRef.current = setInterval(() => {
+      console.log('interval is running')
       dispatch(moveSnake())
     }, 1000/ speed)
+    console.log(typeof intervalRef.current)
   }
   
 
   function handleKeyPress(e: KeyboardEvent) {
-    console.log(e.key)
     dispatch(changeDirection({key: e.key}))
   }
+
 
   useEffect(() => {
     document.addEventListener('keyup', handleKeyPress);
@@ -33,6 +37,13 @@ function App() {
     };
   }, [])
   
+  useEffect(() => {
+    if (!started) {
+      clearInterval(intervalRef.current)
+      intervalRef.current = null      
+      console.log('game over')
+    }
+  }, [started])
 
   return (
     <div>
@@ -42,7 +53,9 @@ function App() {
         >
           Start Game
         </button>
-        <button onClick={() => dispatch(restartGame())}>
+        <button onClick={() => dispatch(restartGame())}
+          // disabled={started === false}
+        >
           Restart Game
         </button>
       </div>
