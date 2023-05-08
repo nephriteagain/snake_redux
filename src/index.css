@@ -6,4 +6,38 @@
   html {
     font-size: 16px;
   }
+  #root {
+    max-width: 500px;
+    margin-inline: auto;
+    margin-top: 2rem;
+  }
+
+  .grass {
+    background-image: url(./assets/grass.jpg);
+    background-size: cover;
+  }
+
+  .snake-head {
+    position: relative;
+  }
+
+  .snake-head::before {
+    content: '';
+    position: absolute;
+    left: 50%;
+    top: 25%;
+    width: 0.5rem;
+    aspect-ratio: 1/1;
+    background-color: red;
+  }
+
+  .snake-head::after {
+    content: '';
+    position: absolute;
+    left: 50%;
+    bottom: 25%;
+    width: 0.5rem;
+    aspect-ratio: 1/1;
+    background-color: red;
+  }
 }

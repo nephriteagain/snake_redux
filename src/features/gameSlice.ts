@@ -4,18 +4,23 @@ import { GAME_ARR, SNAKE_ARR, SNAKE_HEAD, WALL_BOTTOM, WALL_LEFT, WALL_RIGHT, WA
 type direction = 'right'|'left'|'top'|'bottom'
 
 interface initialState {
-  board: string[],
-  snakeBody: number[],
-  snakeHead: number,
+  board: string[]
+  snakeBody: number[]
+  snakeHead: number
   gameStart: boolean
   direction: direction
-  speed: number,
-  disableSwitchDirection: boolean,
+  speed: number
+  disableSwitchDirection: boolean
   food: number
+  score: number
 }
 
 interface ChangeDirectionPayload {
   key: string;
+}
+
+interface adjustSpeedPayload {
+  speed: string
 }
 
 
@@ -32,19 +37,19 @@ const initialBoardState : string[] = GAME_ARR.map((item, index) => {
   return item
 })
 
-function spawnFood(snakeHead : number, snakeBody: number[]) {
-  function random() {
-    return Math.floor(Math.random() * 100)
-  }
-  const random_number : number = random() 
-  const hasMatch = snakeBody.some(bod => bod === random_number)
-  const isMatch = random_number === snakeHead
-  if (hasMatch || isMatch) {
-    spawnFood(snakeHead, snakeBody)
-  }
 
-  return random_number
+
+function getRandomNumberWithoutExclusions(exclusions : number[]) {
+  const excludedSet = new Set(exclusions);
+  let randomNumber;
+  
+  do {
+    randomNumber = Math.floor(Math.random() * 100);
+  } while (excludedSet.has(randomNumber));
+  
+  return randomNumber;
 }
+
 
 function extendBody(newBody: number[], copyBody: number[]) {
   newBody.push(copyBody[copyBody.length - 1])
@@ -86,7 +91,8 @@ const initialState : initialState = {
   direction: 'right',
   speed: 2,
   disableSwitchDirection: false,
-  food: spawnFood(SNAKE_HEAD, SNAKE_ARR)
+  food: getRandomNumberWithoutExclusions([...SNAKE_ARR, SNAKE_HEAD]),
+  score: 0
 
 }
 
@@ -100,6 +106,7 @@ export const gameSlice = createSlice({
       if (!state.gameStart) {
         return  
       }
+
 
       const selfCollided = selfCollision(state.snakeHead, state.snakeBody)
       if (selfCollided) {
@@ -134,8 +141,9 @@ export const gameSlice = createSlice({
         let snakePos : number = state.snakeHead
         const boardCopy = state.board.map((_, index) => {
             if (state.snakeHead === state.food) {
-              state.food = spawnFood(state.snakeHead, state.snakeBody)
+              state.food = getRandomNumberWithoutExclusions([...state.snakeBody, state.snakeHead])
               extendBody(newSnakeBody, snakeBodyCopy)
+              state.score++
             }   
             if (state.snakeHead + direction === index) {
               snakePos = index
@@ -150,7 +158,7 @@ export const gameSlice = createSlice({
             if (snakeBod === index) {
               return 's'
             }
-            return ''
+            return '' 
         })               
         
           state.snakeBody = newSnakeBody
@@ -194,17 +202,20 @@ export const gameSlice = createSlice({
       state.disableSwitchDirection = true
     },
 
-    restartGame: () => {
-      return initialState
+    restartGame: (state) => {
+      return {...initialState, speed: state.speed}
     },
     startGame: state => {
       state.gameStart = true
+    },
+    adjustSpeed: (state, action: PayloadAction<adjustSpeedPayload>) => {
+      state.speed = Number(action.payload.speed)
     }
 
   }
 
 })
 
-export const { moveSnake, changeDirection, restartGame, startGame } = gameSlice.actions
+export const { moveSnake, changeDirection, restartGame, startGame, adjustSpeed } = gameSlice.actions
 
 export default gameSlice.reducer
