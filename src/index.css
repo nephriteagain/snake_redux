@@ -5,6 +5,7 @@
 @layer base {
   html {
     font-size: 16px;
+    background-color: #FFF7D4;
   }
   #root {
     max-width: 500px;
@@ -19,6 +20,9 @@
 
   .snake-head {
     position: relative;
+    z-index: 100;
+    border-top-right-radius: 20%;
+    border-bottom-right-radius: 20%;
   }
 
   .snake-head::before {
@@ -29,6 +33,7 @@
     width: 0.5rem;
     aspect-ratio: 1/1;
     background-color: red;
+    border-radius: 50%;
   }
 
   .snake-head::after {
@@ -39,5 +44,6 @@
     width: 0.5rem;
     aspect-ratio: 1/1;
     background-color: red;
+    border-radius: 50%;
   }
 }

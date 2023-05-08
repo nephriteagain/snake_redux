@@ -12,7 +12,8 @@ interface initialState {
   speed: number
   disableSwitchDirection: boolean
   food: number
-  score: number
+  score: number,
+  collided: boolean
 }
 
 interface ChangeDirectionPayload {
@@ -82,6 +83,7 @@ function wallCollision(snakeHead: number, direction: direction) {
   }
 }
 
+const savedSpeed = Number(localStorage.getItem('snake_speed'))
 
 const initialState : initialState = {
   board: initialBoardState,
@@ -89,10 +91,11 @@ const initialState : initialState = {
   snakeHead: SNAKE_HEAD,
   gameStart: false,
   direction: 'right',
-  speed: 2,
+  speed: savedSpeed || 2,
   disableSwitchDirection: false,
   food: getRandomNumberWithoutExclusions([...SNAKE_ARR, SNAKE_HEAD]),
-  score: 0
+  score: 0,
+  collided: false
 
 }
 
@@ -111,11 +114,13 @@ export const gameSlice = createSlice({
       const selfCollided = selfCollision(state.snakeHead, state.snakeBody)
       if (selfCollided) {
         state.gameStart = false
+        state.collided = true
         return
       }
       const wallCollided = wallCollision(state.snakeHead, state.direction)
       if (wallCollided) {
         state.gameStart = false
+        state.collided = true
         return
       }
 
@@ -210,6 +215,7 @@ export const gameSlice = createSlice({
     },
     adjustSpeed: (state, action: PayloadAction<adjustSpeedPayload>) => {
       state.speed = Number(action.payload.speed)
+      localStorage.setItem('snake_speed', action.payload.speed)
     }
 
   }

@@ -1,17 +1,20 @@
 import { useAppSelector, useAppDispatch } from "./hooks/hooks"
 import { startGame, changeDirection, restartGame, moveSnake, adjustSpeed } from "./features/gameSlice"
-import { useEffect, useRef, useLayoutEffect } from 'react'
+import { useEffect, useRef, useLayoutEffect, useState } from 'react'
 
-
+import { SPEED_OPTIONS } from "./data/gameData"
+import { snakeBody } from "./helper"
 
 function App() {
-  
+  const [speedOptions, setSpeedOptions] = useState(SPEED_OPTIONS)  
+
   const gameState = useAppSelector(state => state.game)
   const gameBoard = gameState.board
   const speed = gameState.speed
   const started = gameState.gameStart
   const score = gameState.score
   const direction = gameState.direction
+  const collided = gameState.collided
 
   
   const dispatch = useAppDispatch()
@@ -33,35 +36,11 @@ function App() {
     dispatch(changeDirection({key: e.key}))
   }
 
-  function snakeBody(item: string, index: number) {
-    const isOdd = index % 2 === 0
-
-    if (item === 's' && isOdd) {
-      return {
-        backgroundColor: '#F1C40F'
-      }
+  useEffect(() => {
+    if (collided) {
+      alert(`game over, your score is ${score}`)
     }
-    else if (item === 's' && !isOdd) {
-      return {
-        backgroundColor: '#F7DC6F'
-      }
-    }
-    else if (item === 'h') {
-      return {
-        backgroundColor: '#F5B041'
-      }
-    }
-
-    else if (item === 'O') {
-      return {
-        backgroundColor: '#f6546a',
-        borderRadius: '50%',
-      }
-    }
-    else return {      
-    }
-  }
-
+  },[collided])
 
   useEffect(() => {
     document.addEventListener('keyup', handleKeyPress);
@@ -74,7 +53,6 @@ function App() {
     if (!started) {
       clearInterval(intervalRef.current)
       intervalRef.current = null      
-      console.log('game over')
     }
   }, [started])
 
@@ -91,7 +69,7 @@ function App() {
     else if (direction === 'top') {
       snakeRef.current.style.transform = 'rotate(270deg)'
     }
-  }, [gameBoard])
+  }, [gameBoard, direction])
 
   return (
     <div>
@@ -110,36 +88,22 @@ function App() {
           Restart Game
         </button>
         
-        <select defaultValue={2}
+        <select
+          defaultValue={speed}
           disabled={started === true}
           onChange={(e) => dispatch(adjustSpeed({speed: e.currentTarget.value}))}
           className="bg-green-200 px-2 py-1 me-auto rounded-md shadow-md drop-shadow-md hover:bg-green-300 active:scale-95  disabled:opacity-60 transition-all duration-200"
         >
-          <option value={2}>
-            2
-          </option>
-          <option value={3}>
-            3
-          </option>
-          <option value={4}>
-            4
-          </option>
-          <option value={5}>
-            5
-          </option>
-          <option value={6}>
-            6
-          </option>
-          <option value={7}>
-            7
-          </option>
-          <option value={8}>
-            8
-          </option>
-          <option value={9}>
-            9
-          </option>
+          {speedOptions.map((item) => {
+            return (
+              <option value={item} key={item}                
+              >
+                {item}
+              </option>
+            )
+          })}          
         </select>
+
         <div className="px-2 py-1 bg-blue-200 rounded-md shadow-md drop-shadow-md hover:scale-105 transition-all duration-200">
           score: {score}
         </div>
